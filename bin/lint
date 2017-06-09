@@ -1,0 +1,9 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CHECKSTYLE_JAR_PATH="$DIR/checkstyle-6.19-all.jar"
+CHECKSTYLE_CONFIG_PATH="$DIR/../checkstyle.xml"
+
+find src -name "*.java" | \
+  grep -v generated-sources | grep -v generated-test-sources |
+  xargs java -jar $CHECKSTYLE_JAR_PATH -c $CHECKSTYLE_CONFIG_PATH

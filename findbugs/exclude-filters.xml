@@ -1,0 +1,9 @@
+<FindBugsFilter>
+  <Match>
+    <Bug pattern="CRLF_INJECTION_LOGS"/>
+  </Match>
+  <Match>
+    <Class name="com.kickstarter.dropwizard.metrics.influxdb.io.InfluxDbTcpWriter" />
+    <Bug pattern="UNENCRYPTED_SOCKET" />
+  </Match>
+</FindBugsFilter>

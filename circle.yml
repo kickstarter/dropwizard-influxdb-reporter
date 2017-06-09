@@ -1,0 +1,22 @@
+machine:
+  java:
+    version: oraclejdk8
+
+dependencies:
+  override:
+    - mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+
+test:
+  override:
+    - bin/lint
+    - mvn -o surefire:test
+    - mvn findbugs:check
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/.*-reports/.*.xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
