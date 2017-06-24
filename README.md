@@ -1,6 +1,7 @@
 # Dropwizard InfluxDB Reporter
 
-[![CircleCI](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter.svg?style=svg)](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter)
+[![CircleCI](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter.svg?style=svg)](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter) [![Jitpack](https://jitpack.io/v/kickstarter/dropwizard-influxdb-reporter.svg)](https://jitpack.io/#kickstarter/dropwizard-influxdb-reporter)
+
 
 Sane Dropwizard metrics instrumentation for InfluxDB 1.2+.
 
