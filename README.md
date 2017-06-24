@@ -60,6 +60,8 @@ thread_pools,pool=dw
 
 ## Installation
 
+> Note: This library is only available on Jitpack for now; see the [Jitpack page](https://jitpack.io/#kickstarter/dropwizard-influxdb-reporter) for installation details.
+
 ### Maven
 
 Add the following dependency to your `pom.xml`:
