@@ -1,7 +1,6 @@
 # Dropwizard InfluxDB Reporter
 
-[![CircleCI](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter.svg?style=svg)](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter) [![Jitpack](https://jitpack.io/v/kickstarter/dropwizard-influxdb-reporter.svg)](https://jitpack.io/#kickstarter/dropwizard-influxdb-reporter)
-
+[![Maven Central](https://img.shields.io/maven-central/v/com.kickstarter.dropwizard/dropwizard-influxdb-reporter.svg)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dropwizard-influxdb-reporter%22) [![Javadocs](https://www.javadoc.io/badge/com.kickstarter.dropwizard/dropwizard-influxdb-reporter.svg)](https://www.javadoc.io/doc/com.kickstarter.dropwizard/dropwizard-influxdb-reporter) [![CircleCI](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter.svg?style=svg)](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter)
 
 Sane Dropwizard metrics instrumentation for InfluxDB 1.2+.
 
@@ -60,8 +59,6 @@ thread_pools,pool=dw
 
 
 ## Installation
-
-> Note: This library is only available on Jitpack for now; see the [Jitpack page](https://jitpack.io/#kickstarter/dropwizard-influxdb-reporter) for installation details.
 
 ### Maven
 
