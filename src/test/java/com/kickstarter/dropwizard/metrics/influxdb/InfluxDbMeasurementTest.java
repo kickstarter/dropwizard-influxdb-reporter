@@ -247,26 +247,34 @@ public class InfluxDbMeasurementTest {
   @Test
   public void testBuilder_PutStringAndPrimitiveCollection() {
     final InfluxDbMeasurement measurement = new InfluxDbMeasurement.Builder("Measurement", 90210L)
-      .putField("eating", ImmutableList.of("a", "c", "d"))
+      .putField("eating", Arrays.asList(1, 2, 3))
       .build();
 
     assertEquals("should add Collection field to the measurement",
-      InfluxDbMeasurement.create("Measurement", ImmutableMap.of(), ImmutableMap.of("eating", "[a, c, d]"), 90210L),
+      InfluxDbMeasurement.create("Measurement", ImmutableMap.of(), ImmutableMap.of("eating", "[1, 2, 3]"), 90210L),
       measurement);
   }
 
   @Test
   public void testBuilder_PutNonStringOrPrimitiveCollection() {
+    try {
+      new InfluxDbMeasurement.Builder("Measurement", 90210L)
+        .putField("val", Arrays.asList(ImmutableMap.of("okay", "then")));
+      fail("Expected an Exception when adding a non-String or -primitive field");
+    } catch (final Exception thrown) {
+      assertEquals("Expected an IllegalArgumentException", IllegalArgumentException.class, thrown.getClass());
+      assertEquals("InfluxDbMeasurement collection field 'val' must contain only Strings and primitives: '{\"okay\": \"then\"}'", thrown.getMessage());
+    }
   }
 
   @Test
   public void testBuilder_PutNonStringOrPrimitiveField() {
     try {
-      new InfluxDbMeasurement.Builder("Measurement", 90210L).putField("val", Arrays.asList(1, 2, 3));
+      new InfluxDbMeasurement.Builder("Measurement", 90210L).putField("val", ImmutableMap.of("okay", "then"));
       fail("Expected an Exception when adding a non-String or -primitive field");
     } catch (final Exception thrown) {
       assertEquals("Expected an IllegalArgumentException", IllegalArgumentException.class, thrown.getClass());
-      assertEquals("InfluxDbMeasurement field 'val' must be String or primitive: [1, 2, 3]", thrown.getMessage());
+      assertEquals("InfluxDbMeasurement field 'val' must be a, String, primitive, or Collection: {\"okay\": \"then\"}", thrown.getMessage());
     }
   }
   

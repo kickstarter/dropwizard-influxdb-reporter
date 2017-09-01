@@ -161,27 +161,25 @@ public abstract class InfluxDbMeasurement {
 
         StringBuilder builder = new StringBuilder();
         for (final ? val: value) {
-          fieldToString(val)
-            .map(s -> builder.add(key, s))
-            .orElseThrow(() -> new IllegalArgumentException(
+          try {
+            fieldToString(val).ifPresent(s -> builder.add(key, s));
+          } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
               String.format(
                 "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: '%s'",
-                key,
-                val.toString()
-              )
-            ));
+                key, val));
+          }
         }
         fields.put(key, builder.build());
       } else {
-        fieldToString(value)
-          .map(s -> fields.put(key, s))
-          .orElseThrow(() -> new IllegalArgumentException(
+        try {
+          fieldToString(value).ifPresent(s -> fields.put(key, s))
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException(
             String.format(
-              "InfluxDbMeasurement field '%s' must be String, primitive, or Collection: '%s'",
-              key,
-              value
-            )
-          ));
+              "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: '%s'",
+              key, value));
+        }
       }
 
       return this;
@@ -202,6 +200,9 @@ public abstract class InfluxDbMeasurement {
         return Optional.of(String.format("%di", ((Number) value).longValue()));
       } else if (value instanceof String || value instanceof Boolean) {
         return Optional.of(value.toString());
+      } else {
+        throw new IllegalArgumentException(
+          String.format("invalid field '%s'", value));
       }
 
       return Optional.empty();
