@@ -334,11 +334,11 @@ public class DropwizardTransformer {
         .putTags(tags)
         .tryPutFields(fields, e -> log.warn(e.getMessage()));
 
-    if (builder.isValid()) {
+    if (!builder.isValid()) {
       log.warn("Measurement has no valid fields: {}", groupKey.measurement());
-      return Optional.of(builder.build());
+      return Optional.empty();
     }
 
-    return Optional.empty();
+    return Optional.of(builder.build());
   }
 }
