@@ -4,9 +4,11 @@ import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -155,37 +157,38 @@ public abstract class InfluxDbMeasurement {
       }
 
       if (value instanceof Collection<?>) {
-        if (value.isEmpty()) {
+        final Collection collection = (Collection) value;
+        if (collection.isEmpty()) {
           return this;
         }
 
-        StringBuilder builder = new StringBuilder();
-        for (final ? val: value) {
-          try {
-            fieldToString(val).ifPresent(s -> builder.add(key, s));
-          } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-              String.format(
-                "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: '%s'",
-                key, val));
-          }
-        }
-        fields.put(key, builder.build());
-      } else {
         try {
-          fieldToString(value).ifPresent(s -> fields.put(key, s))
+          // validate that all the collection values are strings or primitives.
+          collection.stream().map(this::fieldToString);
+          fields.put(key, collection.toString());
         } catch (IllegalArgumentException e) {
           throw new IllegalArgumentException(
             String.format(
-              "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: '%s'",
-              key, value));
+              "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: %s",
+              key, e.getMessage())
+          );
+        }
+      } else {
+        try {
+          fieldToString(value).ifPresent(s -> fields.put(key, s));
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException(
+            String.format(
+              "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: %s",
+              key, e.getMessage())
+          );
         }
       }
 
       return this;
     }
 
-    private Optional<String> fieldToString(final T value) {
+    private <T> Optional<String> fieldToString(final T value) {
       if (value instanceof Float) {
         final float f = (Float) value;
         if (!Float.isNaN(f) && !Float.isInfinite(f)) {
