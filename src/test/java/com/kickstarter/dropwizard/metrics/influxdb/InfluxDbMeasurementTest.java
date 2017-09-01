@@ -245,6 +245,21 @@ public class InfluxDbMeasurementTest {
   }
 
   @Test
+  public void testBuilder_PutStringAndPrimitiveCollection() {
+    final InfluxDbMeasurement measurement = new InfluxDbMeasurement.Builder("Measurement", 90210L)
+      .putField("eating", ImmutableList.of("a", "c", "d"))
+      .build();
+
+    assertEquals("should add Collection field to the measurement",
+      InfluxDbMeasurement.create("Measurement", ImmutableMap.of(), ImmutableMap.of("eating", "[a, c, d]"), 90210L),
+      measurement);
+  }
+
+  @Test
+  public void testBuilder_PutNonStringOrPrimitiveCollection() {
+  }
+
+  @Test
   public void testBuilder_PutNonStringOrPrimitiveField() {
     try {
       new InfluxDbMeasurement.Builder("Measurement", 90210L).putField("val", Arrays.asList(1, 2, 3));

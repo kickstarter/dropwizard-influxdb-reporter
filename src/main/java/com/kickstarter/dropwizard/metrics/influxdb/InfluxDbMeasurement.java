@@ -147,34 +147,64 @@ public abstract class InfluxDbMeasurement {
     /**
      * Adds the given key-value pair to the fields map.
      *
-     * @throws IllegalArgumentException if any value is not a String or primitive.
+     * @throws IllegalArgumentException if any value is not a String, primitive, or Collection of strings and primitives.
      */
     public <T> Builder putField(final String key, final T value) {
       if (value == null) {
         return this;
       }
 
+      if (value instanceof Collection<?>) {
+        if (value.isEmpty()) {
+          return this;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (final ? val: value) {
+          fieldToString(val)
+            .map(s -> builder.add(key, s))
+            .orElseThrow(() -> new IllegalArgumentException(
+              String.format(
+                "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: '%s'",
+                key,
+                val.toString()
+              )
+            ));
+        }
+        fields.put(key, builder.build());
+      } else {
+        fieldToString(value)
+          .map(s -> fields.put(key, s))
+          .orElseThrow(() -> new IllegalArgumentException(
+            String.format(
+              "InfluxDbMeasurement field '%s' must be String, primitive, or Collection: '%s'",
+              key,
+              value
+            )
+          ));
+      }
+
+      return this;
+    }
+
+    private Optional<String> fieldToString(final T value) {
       if (value instanceof Float) {
         final float f = (Float) value;
         if (!Float.isNaN(f) && !Float.isInfinite(f)) {
-          fields.put(key, String.valueOf(f));
+          return Optional.of(String.valueOf(f));
         }
       } else if (value instanceof Double) {
         final double d = (Double) value;
         if (!Double.isNaN(d) && !Double.isInfinite(d)) {
-          fields.put(key, String.valueOf(d));
+          return Optional.of(String.valueOf(d));
         }
       } else if (value instanceof Integer || value instanceof Long) {
-        fields.put(key, String.format("%di", ((Number) value).longValue()));
+        return Optional.of(String.format("%di", ((Number) value).longValue()));
       } else if (value instanceof String || value instanceof Boolean) {
-        fields.put(key, value.toString());
-      } else {
-        throw new IllegalArgumentException(
-          String.format("InfluxDbMeasurement field '%s' must be String or primitive: %s", key, value)
-        );
+        return Optional.of(value.toString());
       }
 
-      return this;
+      return Optional.empty();
     }
 
     public InfluxDbMeasurement build() {
