@@ -6,7 +6,6 @@ import com.google.common.base.Preconditions;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,6 +105,7 @@ public abstract class InfluxDbMeasurement {
 
     /**
      * Adds all key-value pairs to the tags map.
+     *
      * @param items
      * @return
      */
@@ -137,7 +137,7 @@ public abstract class InfluxDbMeasurement {
      */
     public <T> Builder tryPutFields(final Map<String, T> fields,
                                     final Consumer<IllegalArgumentException> exceptionHandler) {
-      for(final Map.Entry<String, T> field: fields.entrySet()) {
+      for (final Map.Entry<String, T> field : fields.entrySet()) {
         try {
           putField(field.getKey(), field.getValue());
         } catch (IllegalArgumentException e) {
@@ -150,49 +150,72 @@ public abstract class InfluxDbMeasurement {
     /**
      * Adds the given key-value pair to the fields map.
      *
-     * @throws IllegalArgumentException if any value is not a String, primitive, or Collection of strings and primitives.
+     * @throws IllegalArgumentException if any value is not a String, primitive,
+     *         or Collection of Strings and primitives.
      */
     public <T> Builder putField(final String key, final T value) {
-      if (value == null) {
-        return this;
-      }
-
       if (value instanceof Collection<?>) {
         final Collection collection = (Collection) value;
         if (collection.isEmpty()) {
           return this;
         }
 
-        try {
-          // validate that all the collection values are strings or primitives.
-          final Iterator iterator = collection.iterator();
-          while (iterator.hasNext()) {
-            fieldToString(iterator.next());
-          }
-          fields.put(key, collection.toString());
-        } catch (IllegalArgumentException e) {
-          throw new IllegalArgumentException(
-            String.format(
-              "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: %s",
-              key, e.getMessage())
-          );
-        }
-      } else {
-        try {
-          fieldToString(value).ifPresent(s -> fields.put(key, s));
-        } catch (IllegalArgumentException e) {
-          throw new IllegalArgumentException(
-            String.format(
-              "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: %s",
-              key, e.getMessage())
-          );
-        }
+        final String collString = validatePrimitiveCollection(key, collection);
+        fields.put(key, collString);
+      } else if (value != null) {
+        final Optional<String> fieldString = validatePrimitiveField(key, value);
+        fieldString.ifPresent(s -> fields.put(key, s));
       }
 
       return this;
     }
 
-    private <T> Optional<String> fieldToString(final T value) {
+    /**
+     * Validates that the collection only contains Strings and primitives.
+     *
+     * @return the collection as a string, if valid.
+     * @throws IllegalArgumentException if any collection value is not a string or primitive.
+     */
+    private static String validatePrimitiveCollection(final String key, final Collection collection) {
+      try {
+        collection.forEach(InfluxDbMeasurement.Builder::fieldToString);
+        return collection.toString();
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(
+          String.format(
+            "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: %s",
+            key, e.getMessage())
+        );
+      }
+    }
+
+    /**
+     * Validates that the field is a String or primitive.
+     *
+     * @return an Optional containing the stringified field, or Optional.empty()
+     *         if the field is an invalid primitive field.
+
+     * @throws IllegalArgumentException if the field is not a string or primitive.
+     */
+    private static Optional<String> validatePrimitiveField(final String key, final Object value) {
+      try {
+        return fieldToString(value);
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(
+          String.format(
+            "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: %s",
+            key, e.getMessage())
+        );
+      }
+    }
+
+    /**
+     * Converts a field into an InfluxDB-compatible string.
+     *
+     * @return an Optional containing the stringified field, or Optional.empty()
+     *         if the field is an invalid primitive field.
+     */
+    private static <T> Optional<String> fieldToString(final T value) {
       if (value instanceof Float) {
         final float f = (Float) value;
         if (!Float.isNaN(f) && !Float.isInfinite(f)) {
