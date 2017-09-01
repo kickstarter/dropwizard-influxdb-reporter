@@ -105,9 +105,6 @@ public abstract class InfluxDbMeasurement {
 
     /**
      * Adds all key-value pairs to the tags map.
-     *
-     * @param items
-     * @return
      */
     public Builder putTags(final Map<String, String> items) {
       tags.putAll(items);
