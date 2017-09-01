@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,7 +165,10 @@ public abstract class InfluxDbMeasurement {
 
         try {
           // validate that all the collection values are strings or primitives.
-          collection.stream().map(this::fieldToString);
+          final Iterator iterator = collection.iterator();
+          while (iterator.hasNext()) {
+            fieldToString(iterator.next());
+          }
           fields.put(key, collection.toString());
         } catch (IllegalArgumentException e) {
           throw new IllegalArgumentException(

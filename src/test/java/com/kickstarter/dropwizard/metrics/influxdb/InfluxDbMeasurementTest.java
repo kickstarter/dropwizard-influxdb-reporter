@@ -259,7 +259,7 @@ public class InfluxDbMeasurementTest {
     try {
       new InfluxDbMeasurement.Builder("Measurement", 90210L)
         .putField("val", Arrays.asList(ImmutableMap.of("okay", "then")));
-      fail("Expected an Exception when adding a non-String or -primitive field");
+      fail("Expected an Exception when adding a non-String, -primitive, or Collection field");
     } catch (final Exception thrown) {
       assertEquals("Expected an IllegalArgumentException", IllegalArgumentException.class, thrown.getClass());
       assertEquals("InfluxDbMeasurement collection field 'val' must contain " +
