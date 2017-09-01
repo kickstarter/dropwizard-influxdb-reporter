@@ -156,14 +156,10 @@ public abstract class InfluxDbMeasurement {
     public <T> Builder putField(final String key, final T value) {
       if (value instanceof Collection<?>) {
         final Collection collection = (Collection) value;
-        if (collection.isEmpty()) {
-          return this;
-        }
-
-        final String collString = validatePrimitiveCollection(key, collection);
+        final String collString = validatedPrimitiveCollection(key, collection);
         fields.put(key, collString);
       } else if (value != null) {
-        final Optional<String> fieldString = validatePrimitiveField(key, value);
+        final Optional<String> fieldString = validatedPrimitiveField(key, value);
         fieldString.ifPresent(s -> fields.put(key, s));
       }
 
@@ -176,7 +172,7 @@ public abstract class InfluxDbMeasurement {
      * @return the collection as a string, if valid.
      * @throws IllegalArgumentException if any collection value is not a string or primitive.
      */
-    private static String validatePrimitiveCollection(final String key, final Collection collection) {
+    private static String validatedPrimitiveCollection(final String key, final Collection collection) {
       try {
         collection.forEach(InfluxDbMeasurement.Builder::fieldToString);
         return collection.toString();
@@ -197,7 +193,7 @@ public abstract class InfluxDbMeasurement {
 
      * @throws IllegalArgumentException if the field is not a string or primitive.
      */
-    private static Optional<String> validatePrimitiveField(final String key, final Object value) {
+    private static Optional<String> validatedPrimitiveField(final String key, final Object value) {
       try {
         return fieldToString(value);
       } catch (IllegalArgumentException e) {
