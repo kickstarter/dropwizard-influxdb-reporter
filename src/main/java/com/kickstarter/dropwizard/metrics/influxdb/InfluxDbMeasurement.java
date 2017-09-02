@@ -3,6 +3,7 @@ package com.kickstarter.dropwizard.metrics.influxdb;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +20,10 @@ import static java.util.stream.Collectors.toList;
  */
 @AutoValue
 public abstract class InfluxDbMeasurement {
+  private static final List<Class> VALID_FIELD_CLASSES = ImmutableList.of(
+    Float.class, Double.class, Integer.class, Long.class, String.class, Boolean.class
+  );
+
   public abstract String name();
   public abstract Map<String, String> tags();
   public abstract Map<String, String> fields();
@@ -170,16 +175,27 @@ public abstract class InfluxDbMeasurement {
      * @throws IllegalArgumentException if any collection value is not a string or primitive.
      */
     private static String validatedPrimitiveCollection(final String key, final Collection collection) {
-      try {
-        collection.forEach(InfluxDbMeasurement.Builder::fieldToString);
-        return collection.toString();
-      } catch (IllegalArgumentException e) {
-        throw new IllegalArgumentException(
-          String.format(
-            "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: %s",
-            key, e.getMessage())
-        );
+      for (final Object value : collection) {
+        if (!isValidField(value)) {
+          throw new IllegalArgumentException(
+            String.format(
+              "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: invalid field '%s'",
+              key, value
+            )
+          );
+        }
       }
+
+      return collection.toString();
+    }
+
+    /**
+     * Validates that the field is a String or primitive.
+     *
+     * @return true if the field is a String or primitive.
+     */
+    private static <T> boolean isValidField(final T value) {
+      return VALID_FIELD_CLASSES.stream().anyMatch(klass -> klass.isInstance(value));
     }
 
     /**
@@ -187,28 +203,10 @@ public abstract class InfluxDbMeasurement {
      *
      * @return an Optional containing the stringified field, or Optional.empty()
      *         if the field is an invalid primitive field.
-
+     *
      * @throws IllegalArgumentException if the field is not a string or primitive.
      */
-    private static Optional<String> validatedPrimitiveField(final String key, final Object value) {
-      try {
-        return fieldToString(value);
-      } catch (IllegalArgumentException e) {
-        throw new IllegalArgumentException(
-          String.format(
-            "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: %s",
-            key, e.getMessage())
-        );
-      }
-    }
-
-    /**
-     * Converts a field into an InfluxDB-compatible string.
-     *
-     * @return an Optional containing the stringified field, or Optional.empty()
-     *         if the field is an invalid primitive field.
-     */
-    private static <T> Optional<String> fieldToString(final T value) {
+    private static <T> Optional<String> validatedPrimitiveField(final String key, final T value) {
       if (value instanceof Float) {
         final float f = (Float) value;
         if (!Float.isNaN(f) && !Float.isInfinite(f)) {
@@ -225,7 +223,11 @@ public abstract class InfluxDbMeasurement {
         return Optional.of(value.toString());
       } else {
         throw new IllegalArgumentException(
-          String.format("invalid field '%s'", value));
+          String.format(
+            "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: invalid field '%s'",
+            key, value
+          )
+        );
       }
 
       return Optional.empty();
