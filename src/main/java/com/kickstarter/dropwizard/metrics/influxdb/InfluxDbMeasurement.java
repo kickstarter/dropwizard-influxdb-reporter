@@ -127,7 +127,7 @@ public abstract class InfluxDbMeasurement {
     }
 
     /**
-     * Adds all key-value pairs to the fields map.
+     * Adds all key-value pairs to the fields map; null, NaN, and +-Inf values are dropped.
      *
      * @throws IllegalArgumentException if any value is not a String or primitive.
      */
@@ -137,7 +137,7 @@ public abstract class InfluxDbMeasurement {
     }
 
     /**
-     * Adds all key-value pairs to the fields map.
+     * Adds all key-value pairs to the fields map; null, NaN, and +-Inf values are dropped.
      */
     public <T> Builder tryPutFields(final Map<String, T> fields,
                                     final Consumer<IllegalArgumentException> exceptionHandler) {
@@ -152,7 +152,7 @@ public abstract class InfluxDbMeasurement {
     }
 
     /**
-     * Adds the given key-value pair to the fields map.
+     * Adds the given key-value pair to the fields map if it is not one of: null, NaN, +-Inf.
      *
      * @throws IllegalArgumentException if any value is not one of:
      *         null, String, primitive, or a Collection of Strings and primitives.
