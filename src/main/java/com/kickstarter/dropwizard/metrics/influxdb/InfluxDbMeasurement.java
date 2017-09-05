@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 @AutoValue
 public abstract class InfluxDbMeasurement {
   private static final List<Class> VALID_FIELD_CLASSES = ImmutableList.of(
-    Float.class, Double.class, Integer.class, Long.class, String.class, Boolean.class
+    Number.class, Character.class, String.class, Boolean.class
   );
 
   public abstract String name();
@@ -217,9 +217,10 @@ public abstract class InfluxDbMeasurement {
         if (!Double.isNaN(d) && !Double.isInfinite(d)) {
           return Optional.of(String.valueOf(d));
         }
-      } else if (value instanceof Integer || value instanceof Long) {
+      } else if (value instanceof Number) {
+        // Serialize Byte, Short, Integer, and Long values as integers.
         return Optional.of(String.format("%di", ((Number) value).longValue()));
-      } else if (value instanceof String || value instanceof Boolean) {
+      } else if (value instanceof String || value instanceof Character || value instanceof Boolean) {
         return Optional.of(value.toString());
       } else {
         throw new IllegalArgumentException(
