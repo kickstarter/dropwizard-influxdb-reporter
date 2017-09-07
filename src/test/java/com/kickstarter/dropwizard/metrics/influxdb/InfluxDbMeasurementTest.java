@@ -2,7 +2,6 @@ package com.kickstarter.dropwizard.metrics.influxdb;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -245,13 +244,38 @@ public class InfluxDbMeasurementTest {
   }
 
   @Test
+  public void testBuilder_PutStringAndPrimitiveCollection() {
+    final InfluxDbMeasurement measurement = new InfluxDbMeasurement.Builder("Measurement", 90210L)
+      .putField("eating", Arrays.asList(1, 2, 3))
+      .build();
+
+    assertEquals("should add Collection field to the measurement",
+      InfluxDbMeasurement.create("Measurement", ImmutableMap.of(), ImmutableMap.of("eating", "[1, 2, 3]"), 90210L),
+      measurement);
+  }
+
+  @Test
+  public void testBuilder_PutNonStringOrPrimitiveCollection() {
+    try {
+      new InfluxDbMeasurement.Builder("Measurement", 90210L)
+        .putField("val", Arrays.asList(ImmutableMap.of("okay", "then")));
+      fail("Expected an Exception when adding a non-String, -primitive, or Collection field");
+    } catch (final Exception thrown) {
+      assertEquals("Expected an IllegalArgumentException", IllegalArgumentException.class, thrown.getClass());
+      assertEquals("InfluxDbMeasurement collection field 'val' must contain " +
+        "only Strings and primitives: invalid field '{okay=then}'", thrown.getMessage());
+    }
+  }
+
+  @Test
   public void testBuilder_PutNonStringOrPrimitiveField() {
     try {
-      new InfluxDbMeasurement.Builder("Measurement", 90210L).putField("val", Arrays.asList(1, 2, 3));
+      new InfluxDbMeasurement.Builder("Measurement", 90210L).putField("val", ImmutableMap.of("okay", "then"));
       fail("Expected an Exception when adding a non-String or -primitive field");
     } catch (final Exception thrown) {
       assertEquals("Expected an IllegalArgumentException", IllegalArgumentException.class, thrown.getClass());
-      assertEquals("InfluxDbMeasurement field 'val' must be String or primitive: [1, 2, 3]", thrown.getMessage());
+      assertEquals("InfluxDbMeasurement field 'val' must be a String, primitive, or Collection: " +
+        "invalid field '{okay=then}'", thrown.getMessage());
     }
   }
   
@@ -260,9 +284,9 @@ public class InfluxDbMeasurementTest {
     final ArrayList<Exception> exceptions = new ArrayList<>();
 
     new InfluxDbMeasurement.Builder("Measurement", 90210L).tryPutFields(ImmutableMap.of(
-      "a", ImmutableSet.of(),
+      "a", ImmutableMap.of("well", "okay"),
       "c", "d",
-      "e", Arrays.asList(1, 2, 3)
+      "e", ImmutableMap.of("not", 1, "good", 2)
     ), exceptions::add);
 
     assertEquals("should catch two exceptions", 2, exceptions.size());
@@ -270,8 +294,8 @@ public class InfluxDbMeasurementTest {
     assertEquals("should catch IllegalArgumentExceptions", IllegalArgumentException.class, exceptions.get(1).getClass());
     assertEquals("should describe the invalid key-value pair",
       ImmutableList.of(
-        "InfluxDbMeasurement field 'a' must be String or primitive: []",
-        "InfluxDbMeasurement field 'e' must be String or primitive: [1, 2, 3]"
+        "InfluxDbMeasurement field 'a' must be a String, primitive, or Collection: invalid field '{well=okay}'",
+        "InfluxDbMeasurement field 'e' must be a String, primitive, or Collection: invalid field '{not=1, good=2}'"
       ),
       exceptions.stream().map(Exception::getMessage).collect(toList())
     );

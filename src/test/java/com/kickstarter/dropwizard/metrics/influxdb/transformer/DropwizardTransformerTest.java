@@ -430,11 +430,13 @@ public class DropwizardTransformerTest {
     final Map<String, Object> objFields = ImmutableMap.of(
       "some", true,
       "bad", Arrays.asList(1, 2, 3),
-      "fields", 5
+      "fields", 5,
+      "NOW", ImmutableMap.of("ha", "ha")
     );
 
     final Map<String, String> strFields = ImmutableMap.of(
       "some", "true",
+      "bad", "[1, 2, 3]",
       "fields", "5i"
     );
 
@@ -451,7 +453,7 @@ public class DropwizardTransformerTest {
 
     final Map<String, Object> objFields = ImmutableMap.of(
       "all", Float.NaN,
-      "bad", Arrays.asList(1, 2, 3),
+      "bad", ImmutableMap.of("oh", "no"),
       "fields", Float.NaN
     );
 
