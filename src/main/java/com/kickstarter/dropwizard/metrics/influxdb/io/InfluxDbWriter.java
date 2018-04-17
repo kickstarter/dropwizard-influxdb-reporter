@@ -15,13 +15,7 @@ public interface InfluxDbWriter {
    *
    * @throws Exception if an error occurs while writing.
    */
-  void writeBytes(final byte[] bytes) throws Exception;
-  /**
-   * Close the writer connection, if it is open.
-   *
-   * @throws IOException if an I/O error occurs when closing the connection.
-   */
-  void close() throws IOException;
+  void writeBytes(final byte[] bytes) throws IOException;
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
   @JsonSubTypes({

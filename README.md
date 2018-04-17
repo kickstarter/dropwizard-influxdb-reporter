@@ -1,6 +1,5 @@
 # Dropwizard InfluxDB Reporter
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.kickstarter/dropwizard-influxdb-reporter.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.kickstarter%22%20a%3A%22dropwizard-influxdb-reporter%22) [![Javadocs](https://www.javadoc.io/badge/com.kickstarter/dropwizard-influxdb-reporter.svg)](https://www.javadoc.io/doc/com.kickstarter/dropwizard-influxdb-reporter) [![CircleCI](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter.svg?style=svg)](https://circleci.com/gh/kickstarter/dropwizard-influxdb-reporter)
 
 Sane Dropwizard metrics instrumentation for InfluxDB 1.2+.
 
@@ -58,33 +57,6 @@ thread_pools,pool=dw
 ```
 
 
-## Installation
-
-### Maven
-
-Add the following dependency to your `pom.xml`:
-
-```xml
-<dependency>
-  <groupId>com.kickstarter</groupId>
-  <artifactId>dropwizard-influxdb-reporter</artifactId>
-  <version>${dropwizard-influxdb-reporter.version}</version>
-</dependency>
-```
-
-### Gradle
-
-Add the following dependency to your gradle file:
-
-```groovy
-repositories {
-  mavenCentral()
-}
-
-dependencies {
-  compile 'com.kickstarter:dropwizard-influxdb-reporter${dropwizardInfluxdbReporterVersion}'
-}
-```
 
 ## Configuration
 

@@ -4,7 +4,7 @@
 
   <groupId>com.kickstarter</groupId>
   <artifactId>dropwizard-influxdb-reporter</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Dropwizard InfluxDB Reporter</name>
@@ -20,15 +20,16 @@
   </licenses>
 
   <scm>
-    <url>https://github.com/kickstarter/dropwizard-influxdb-reporter</url>
-    <connection>scm:git:git://github.com/kickstarter/dropwizard-influxdb-reporter.git</connection>
-    <developerConnection>scm:git:git:@github.com:kickstarter/dropwizard-influxdb-reporter.git</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://github.com/signavio/dropwizard-influxdb-reporter</url>
+    <connection>scm:git:git://github.com/signavio/dropwizard-influxdb-reporter.git</connection>
+    <developerConnection>scm:git:git:@github.com:signavio/dropwizard-influxdb-reporter.git</developerConnection>
   </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
   </properties>
 
   <developers>
@@ -38,6 +39,13 @@
       <email>kevinyeah@utexas.edu</email>
       <organization>Kickstarter</organization>
       <organizationUrl>https://www.kickstarter.com</organizationUrl>
+    </developer>
+    <developer>
+      <id>leassis</id>
+      <name>Leandro Assis</name>
+      <email>leandro.deoliveira@signavio.com</email>
+      <organization>Signavio</organization>
+      <organizationUrl>https://www.signavio.com</organizationUrl>
     </developer>
   </developers>
 
@@ -100,20 +108,6 @@
   <!-- Build plugins -->
   <build>
     <plugins>
-      <!-- force compilation with 1.8 -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-          <encoding>UTF-8</encoding>
-          <compilerArgs>
-            <compilerArg>-parameters</compilerArg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
 
       <!-- specify specific versions of jar and surefire plugins so they can be downloaded and cached in circle -->
       <plugin>
@@ -164,25 +158,6 @@
       </plugin>
 
       <!-- help out IDEA with generated sources -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>test</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/target/generated-sources/annotations</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
 
       <!-- release management -->
       <plugin>
@@ -213,6 +188,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
             <configuration>
               <additionalparam>-Xdoclint:none</additionalparam>
             </configuration>
@@ -221,58 +197,5 @@
       </build>
     </profile>
 
-    <!-- release steps -->
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <!-- distribute javadocs -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-          <!-- distribute source -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.0</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-          <!-- sign artifacts -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 </project>

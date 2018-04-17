@@ -3,14 +3,8 @@ package com.kickstarter.dropwizard.metrics.influxdb;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -21,10 +15,6 @@ import static java.util.stream.Collectors.toList;
  */
 @AutoValue
 public abstract class InfluxDbMeasurement {
-  private static final Set<Class> VALID_FIELD_CLASSES = ImmutableSet.of(
-    Boolean.class, Byte.class, Character.class, Double.class, Float.class,
-    Integer.class, Long.class, Short.class, String.class
-  );
 
   public abstract String name();
   public abstract Map<String, String> tags();
@@ -81,11 +71,10 @@ public abstract class InfluxDbMeasurement {
    * <p>e.g. "k1=v1,k2=v2,k3=v3"
    */
   @VisibleForTesting static String joinPairs(final Map<String, String> pairs) {
-    final List<String> pairStrs = pairs.entrySet()
-      .parallelStream()
-      .map(e -> String.join("=", e.getKey(), e.getValue()))
-      .collect(toList());
-
+    final List<String> pairStrs = pairs.entrySet().stream()
+            .map(e -> String.join("=", e.getKey(), e.getValue()))
+            .collect(toList());
+    
     return String.join(",", pairStrs);
   }
 
@@ -157,83 +146,35 @@ public abstract class InfluxDbMeasurement {
      * @throws IllegalArgumentException if any value is not one of:
      *         null, String, primitive, or a Collection of Strings and primitives.
      */
-    public <T> Builder putField(final String key, final T value) {
-      if (value instanceof Collection<?>) {
-        final Collection collection = (Collection) value;
-        final String collString = validatedPrimitiveCollection(key, collection);
-        fields.put(key, collString);
-      } else if (value != null) {
-        final Optional<String> fieldString = validatedPrimitiveField(key, value);
-        fieldString.ifPresent(s -> fields.put(key, s));
-      }
-
-      return this;
-    }
-
-    /**
-     * Validates that the collection only contains null values, Strings, and primitives.
-     *
-     * @return the collection as a string, if valid.
-     * @throws IllegalArgumentException if any collection value is not a null value, string or primitive.
-     */
-    private static String validatedPrimitiveCollection(final String key, final Collection collection) {
-      for (final Object value : collection) {
-        if (!isValidField(value)) {
-          throw new IllegalArgumentException(
-            String.format(
-              "InfluxDbMeasurement collection field '%s' must contain only Strings and primitives: invalid field '%s'",
-              key, value
-            )
-          );
-        }
-      }
-
-      return collection.toString();
-    }
-
-    /**
-     * Validates that the field is a null value, String, or primitive.
-     *
-     * @return true if the field is a null value, String, or primitive.
-     */
-    private static <T> boolean isValidField(final T value) {
-      return value == null || VALID_FIELD_CLASSES.contains(value.getClass());
-    }
-
-    /**
-     * Validates that the field is a String or primitive.
-     *
-     * @return an Optional containing the stringified field, or Optional.empty()
-     *         if the field is an invalid primitive field.
-     *
-     * @throws IllegalArgumentException if the field is not a string or primitive.
-     */
-    private static <T> Optional<String> validatedPrimitiveField(final String key, final T value) {
+    public Builder putField(final String key, final Object value) {
       if (value instanceof Float) {
         final float f = (Float) value;
         if (!Float.isNaN(f) && !Float.isInfinite(f)) {
-          return Optional.of(String.valueOf(f));
+          fields.put(key, String.valueOf(f));
         }
       } else if (value instanceof Double) {
         final double d = (Double) value;
         if (!Double.isNaN(d) && !Double.isInfinite(d)) {
-          return Optional.of(String.valueOf(d));
+          fields.put(key, String.valueOf(d));
         }
       } else if (value instanceof Number) {
         // Serialize Byte, Short, Integer, and Long values as integers.
-        return Optional.of(String.format("%di", ((Number) value).longValue()));
-      } else if (value instanceof String || value instanceof Character || value instanceof Boolean) {
-        return Optional.of(value.toString());
+        fields.put(key, String.format("%di", ((Number) value).longValue()));
+      } else if (value instanceof Boolean) {
+        fields.put(key, value.toString());
+      } else if (value instanceof String || value instanceof Character) {
+        fields.put(key, ("\"" + value + "\""));
+      } else if (value instanceof Collection<?>) {
       } else {
         throw new IllegalArgumentException(
-          String.format(
-            "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: invalid field '%s'",
-            key, value
-          )
+                String.format(
+                        "InfluxDbMeasurement field '%s' must be a String, primitive, or Collection: invalid field '%s'",
+                        key, value
+                )
         );
       }
 
-      return Optional.empty();
+      return this;
     }
 
     public InfluxDbMeasurement build() {

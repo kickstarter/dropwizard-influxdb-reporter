@@ -1,44 +1,50 @@
 package com.kickstarter.dropwizard.metrics.influxdb.io;
 
-import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.client.JerseyClientConfiguration;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.Range;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.dropwizard.client.JerseyClientConfiguration;
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.Range;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link InfluxDbWriter} that writes to an HTTP/S server using a {@link Client}.
  */
 public class InfluxDbHttpWriter implements InfluxDbWriter {
-  private final Client client;
+  private static final Logger log = LoggerFactory.getLogger(InfluxDbWriter.class);
+  
   private final WebTarget influxLines;
 
   public InfluxDbHttpWriter(final Client client, final String endpoint) {
-    this.client = client;
     this.influxLines = client.target(endpoint);
   }
 
   @Override
   public void writeBytes(final byte[] bytes) {
-    influxLines.request().post(Entity.entity(bytes, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+    Response post = null;
+    try {
+      post = influxLines.request().post(Entity.entity(bytes, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+      log.debug("status: {} response: {}", post.getStatus(), post.readEntity(Map.class));
+    } finally {
+      closeQuietly(post);
+    }
   }
 
-  @Override
-  public void close() throws IOException {
-    client.close();
-  }
 
   // ===================================================================================================================
   // Builder
@@ -106,5 +112,9 @@ public class InfluxDbHttpWriter implements InfluxDbWriter {
         throw new IllegalArgumentException(e);
       }
     }
+  }
+  
+  private void closeQuietly(Response response){
+    Optional.ofNullable(response).ifPresent(Response::close);
   }
 }

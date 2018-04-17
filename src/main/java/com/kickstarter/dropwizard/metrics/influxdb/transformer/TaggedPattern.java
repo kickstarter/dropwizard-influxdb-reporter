@@ -38,7 +38,8 @@ public class TaggedPattern {
   private final Pattern compiledPattern;
 
   @JsonCreator
-  public TaggedPattern(final String pattern, final List<String> tagKeys) {
+  public TaggedPattern(@JsonProperty("pattern") final String pattern,
+                       @JsonProperty("tagKeys") final List<String> tagKeys) {
     this.pattern = pattern;
     this.tagKeys = tagKeys;
     this.compiledPattern = Pattern.compile(pattern);

@@ -35,7 +35,6 @@ public class SenderTest {
     sender.send(ImmutableList.of());
 
     verify(writer, never()).writeBytes(any());
-    verify(writer, never()).close();
   }
 
   @Test
@@ -49,7 +48,6 @@ public class SenderTest {
     );
 
     verify(writer, times(1)).writeBytes("hello,x=y a=b 90210000000\n".getBytes());
-    verify(writer, times(1)).close();
   }
 
   @Test
@@ -65,7 +63,6 @@ public class SenderTest {
     );
 
     verify(writer, times(1)).writeBytes("hello,x=y a=b 90210000000\n".getBytes());
-    verify(writer, times(1)).close();
 
     sender.send(ImmutableList.of());
     verify(writer, times(2)).writeBytes("hello,x=y a=b 90210000000\n".getBytes());

@@ -1,13 +1,12 @@
 package com.kickstarter.dropwizard.metrics.influxdb.io;
 
+import java.util.Collection;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.EvictingQueue;
 import com.kickstarter.dropwizard.metrics.influxdb.InfluxDbMeasurement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
 
 import static java.util.stream.Collectors.toList;
 
@@ -16,9 +15,9 @@ import static java.util.stream.Collectors.toList;
  * failed to send, and timestamps measurements at the configured {@code precision}, up to millisecond precision.
  */
 public class Sender {
-  private static final Logger log = LoggerFactory.getLogger(InfluxDbTcpWriter.class);
+  private static final Logger log = LoggerFactory.getLogger(Sender.class);
 
-  public static final int DEFAULT_QUEUE_SIZE = 5000;
+  private static final int DEFAULT_QUEUE_SIZE = 5000;
   private static final String SEPARATOR = "\n";
 
   private final InfluxDbWriter writer;
@@ -61,15 +60,8 @@ public class Sender {
       writer.writeBytes(measureBytes);
       queuedInfluxDbMeasurements.clear();
       return true;
-    } catch (final UnsupportedEncodingException e) {
-      log.warn("failed to send metrics", e);
     } catch (final Exception e) {
       log.warn("failed to send metrics", e);
-      try {
-        writer.close();
-      } catch (final Exception e2) {
-        log.warn("failed to close metrics connection", e2);
-      }
     }
 
     if (queuedInfluxDbMeasurements.remainingCapacity() == 0) {

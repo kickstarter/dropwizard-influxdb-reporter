@@ -1,15 +1,15 @@
 package com.kickstarter.dropwizard.metrics.influxdb.io;
 
-import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.util.Duration;
-import javax.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.Range;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import javax.validation.constraints.NotNull;
+
+import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.util.Duration;
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.Range;
 
 /**
  * An {@link InfluxDbWriter} that writes bytes to TCP sockets.
@@ -18,7 +18,6 @@ public class InfluxDbTcpWriter implements InfluxDbWriter {
   private final String host;
   private final int port;
   private final Duration timeout;
-  private Socket tcpSocket;
 
   public InfluxDbTcpWriter(final String host, final int port, final Duration timeout) {
     this.host = host;
@@ -28,23 +27,16 @@ public class InfluxDbTcpWriter implements InfluxDbWriter {
 
   @Override
   public void writeBytes(final byte[] bytes) throws IOException {
-    if (tcpSocket == null) {
-      tcpSocket = new Socket(host, port);
+    try (Socket tcpSocket = new Socket(host, port)) {
       tcpSocket.setSoTimeout((int) timeout.toMilliseconds());
+      
+      OutputStream outputStream = tcpSocket.getOutputStream();
+      outputStream.write(bytes);
+      outputStream.flush();
     }
-
-    final OutputStream outputStream = tcpSocket.getOutputStream();
-    outputStream.write(bytes);
-    outputStream.flush();
+    
   }
 
-  @Override
-  public void close() throws IOException {
-    if (tcpSocket != null) {
-      tcpSocket.close();
-      tcpSocket = null;
-    }
-  }
 
   // ===================================================================================================================
   // Builder
