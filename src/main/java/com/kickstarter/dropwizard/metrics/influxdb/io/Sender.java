@@ -61,7 +61,7 @@ public class Sender {
       queuedInfluxDbMeasurements.clear();
       return true;
     } catch (final Exception e) {
-      log.warn("failed to send metrics", e);
+      log.info("failed to send metrics", e);
     }
 
     if (queuedInfluxDbMeasurements.remainingCapacity() == 0) {

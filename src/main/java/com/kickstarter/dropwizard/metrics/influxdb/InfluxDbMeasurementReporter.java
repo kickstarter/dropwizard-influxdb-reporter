@@ -63,7 +63,6 @@ public class InfluxDbMeasurementReporter extends ScheduledReporter {
                      final SortedMap<String, Meter> meters,
                      final SortedMap<String, Timer> timers) {
     final long timestamp = clock.instant().toEpochMilli();
-
     final ImmutableList<InfluxDbMeasurement> influxDbMeasurements = ImmutableList.<InfluxDbMeasurement>builder()
       .addAll(transformer.fromGauges(gauges, timestamp))
       .addAll(transformer.fromCounters(counters, timestamp))

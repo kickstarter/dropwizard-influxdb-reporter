@@ -329,13 +329,11 @@ public class DropwizardTransformer {
     final Map<String, String> tags = new HashMap<>(baseTags);
     tags.putAll(groupKey.tags());
 
-    final InfluxDbMeasurement.Builder builder =
-      new InfluxDbMeasurement.Builder(groupKey.measurement(), timestamp)
+    final InfluxDbMeasurement.Builder builder = new InfluxDbMeasurement.Builder(groupKey.measurement(), timestamp)
         .putTags(tags)
         .tryPutFields(fields, e -> log.warn(e.getMessage()));
 
     if (!builder.isValid()) {
-      log.warn("Measurement has no valid fields: {}", groupKey.measurement());
       return Optional.empty();
     }
 

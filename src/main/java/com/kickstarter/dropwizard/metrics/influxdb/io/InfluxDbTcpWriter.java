@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import io.dropwizard.util.Duration;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
@@ -72,6 +73,7 @@ public class InfluxDbTcpWriter implements InfluxDbWriter {
     @NotBlank
     @JsonProperty
     private String host = "localhost";
+    @VisibleForTesting
     public String host() {
       return host;
     }
@@ -79,6 +81,7 @@ public class InfluxDbTcpWriter implements InfluxDbWriter {
     @Range(min = 0, max = 49151)
     @JsonProperty
     private int port = 8086;
+    @VisibleForTesting
     public int port() {
       return port;
     }
@@ -86,6 +89,7 @@ public class InfluxDbTcpWriter implements InfluxDbWriter {
     @NotNull
     @JsonProperty
     private Duration timeout = Duration.milliseconds(500);
+    @VisibleForTesting
     public Duration timeout() {
       return timeout;
     }
