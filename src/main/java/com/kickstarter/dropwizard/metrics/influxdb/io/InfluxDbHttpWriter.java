@@ -18,14 +18,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import io.dropwizard.client.JerseyClientConfiguration;
-import io.dropwizard.util.Duration;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
-import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
 
 /**
  * An {@link InfluxDbWriter} that writes to an HTTP/S server using a {@link Client}.
@@ -35,7 +31,7 @@ public class InfluxDbHttpWriter implements InfluxDbWriter {
   
   private final WebTarget influxLines;
 
-  public InfluxDbHttpWriter(final Client client, final String endpoint) {
+  private InfluxDbHttpWriter(final Client client, final String endpoint) {
     this.influxLines = client.target(endpoint);
   }
 
@@ -102,13 +98,6 @@ public class InfluxDbHttpWriter implements InfluxDbWriter {
     @JsonProperty
     private String database;
   
-    @JsonProperty
-    private Duration connectTimeout = Duration.milliseconds(500);
-  
-    @JsonProperty
-    private Duration readTimeout = Duration.milliseconds(500);
-    
-    
     @VisibleForTesting
     public String host() {
       return host;
@@ -125,23 +114,15 @@ public class InfluxDbHttpWriter implements InfluxDbWriter {
     }
   
     @VisibleForTesting
-    public Duration connectTimeout() {
-      return connectTimeout;
+    public JerseyClientConfiguration jersey() {
+      return jersey;
     }
-  
-    @VisibleForTesting
-    public Duration readTimeout() {
-      return readTimeout;
-    }
-  
   
     public InfluxDbWriter build(final MetricRegistry metrics) {
       final Client client = new io.dropwizard.client.JerseyClientBuilder(metrics)
         .using(jersey)
         .using(new ObjectMapper())
         .using(Executors.newSingleThreadExecutor())
-        .withProperty(CONNECT_TIMEOUT, Long.valueOf(connectTimeout().toMilliseconds()).intValue())
-        .withProperty(READ_TIMEOUT, Long.valueOf(readTimeout().toMilliseconds()).intValue())
         .build("influxdb-http-writer");
 
       try {

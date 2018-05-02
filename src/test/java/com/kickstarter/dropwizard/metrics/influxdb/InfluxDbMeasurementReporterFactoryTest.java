@@ -97,8 +97,10 @@ public class InfluxDbMeasurementReporterFactoryTest {
                 "\"host\": \"i am a host\"," +
                 "\"port\": \"12345\"," +
                 "\"database\": \"database name\"," +
-                "\"readTimeout\": \"5 minutes\"," +
-                "\"connectTimeout\": \"2 minutes\"" +
+                "\"jersey\": {" +
+                  "\"timeout\": \"5 minutes\"," +
+                  "\"connectionTimeout\": \"2 minutes\"" +
+                "}" +
               "}" +
             "}";
     
@@ -128,8 +130,8 @@ public class InfluxDbMeasurementReporterFactoryTest {
     InfluxDbHttpWriter.Factory http = (InfluxDbHttpWriter.Factory) factoryImpl;
     assertEquals("expected TCP host", "i am a host", http.host());
     assertEquals("expected http port", 12345, http.port());
-    assertEquals("expected http timeout", Duration.minutes(5), http.readTimeout());
-    assertEquals("expected http connect timeout", Duration.minutes(2), http.connectTimeout());
+    assertEquals("expected http timeout", Duration.minutes(5), http.jersey().getTimeout());
+    assertEquals("expected http connect timeout", Duration.minutes(2), http.jersey().getConnectionTimeout());
     assertEquals("expected database name ", "database name", http.database());
   }
 }

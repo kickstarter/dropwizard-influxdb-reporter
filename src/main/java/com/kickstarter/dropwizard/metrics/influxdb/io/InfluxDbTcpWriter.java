@@ -20,7 +20,7 @@ public class InfluxDbTcpWriter implements InfluxDbWriter {
   private final int port;
   private final Duration timeout;
 
-  public InfluxDbTcpWriter(final String host, final int port, final Duration timeout) {
+  private InfluxDbTcpWriter(final String host, final int port, final Duration timeout) {
     this.host = host;
     this.port = port;
     this.timeout = timeout;

@@ -22,14 +22,14 @@ import static java.util.stream.Collectors.toMap;
 public class TaggedPattern {
   @NotBlank
   @JsonProperty
-  private String pattern;
+  private final String pattern;
   public String pattern() {
     return pattern;
   }
 
   @NotNull
   @JsonProperty
-  private List<String> tagKeys;
+  private final List<String> tagKeys;
   public List<String> tagKeys() {
     return tagKeys;
   }

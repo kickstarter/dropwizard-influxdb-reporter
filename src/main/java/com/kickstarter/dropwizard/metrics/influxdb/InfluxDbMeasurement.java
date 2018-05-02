@@ -1,14 +1,15 @@
 package com.kickstarter.dropwizard.metrics.influxdb;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * An InfluxDB measurement representation.
@@ -71,11 +72,9 @@ public abstract class InfluxDbMeasurement {
    * <p>e.g. "k1=v1,k2=v2,k3=v3"
    */
   @VisibleForTesting static String joinPairs(final Map<String, String> pairs) {
-    final List<String> pairStrs = pairs.entrySet().stream()
+    return pairs.entrySet().stream()
             .map(e -> String.join("=", e.getKey(), e.getValue()))
-            .collect(toList());
-    
-    return String.join(",", pairStrs);
+            .collect(Collectors.joining(","));
   }
 
   // ===================================================================================================================
