@@ -28,8 +28,6 @@ jobs:
             - v1-dependencies-{{ .Branch }}-{{ checksum "pom.xml" }}
             - v1-dependencies-{{ .Branch }}-
             - v1-dependencies-
-      - attach_workspace:
-          at: ~/project
       - run:
           name: Lint files
           command: 'bin/lint'
