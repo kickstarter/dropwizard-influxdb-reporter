@@ -1,0 +1,51 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - v1-dependencies-{{ .Branch }}-
+            - v1-dependencies-
+      - run:
+          name: Run Maven toolchain
+          command: 'mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline'
+      - save_cache:
+          key: v1-dependencies-{{ .Branch }}-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+
+  test:
+    docker:
+      - image: circleci/openjdk:8
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - v1-dependencies-{{ .Branch }}-
+            - v1-dependencies-
+      - run:
+          name: Lint files
+          command: 'bin/lint'
+      - run:
+          name: Run surefire tests & save results
+          command: |
+            mkdir -p ./junit/
+            mvn -o clean install surefire:test
+            find . -type f -regex ".*/target/.*-reports/.*.xml" -exec cp {} ./junit/ \;
+      - run: mvn findbugs:check
+      - store_test_results:
+          path: ./junit/
+
+workflows:
+  version: 2
+  build_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
