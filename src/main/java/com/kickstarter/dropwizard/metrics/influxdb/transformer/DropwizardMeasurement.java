@@ -43,7 +43,7 @@ public abstract class DropwizardMeasurement {
    * Sanitizes InfluxDb escape characters.
    */
   private static String sanitize(final String s) {
-    return s.replaceAll(ESCAPE_CHARS, SANITIZER);
+    return "time".equals(s) ? "_time" : s.replaceAll(ESCAPE_CHARS, SANITIZER);
   }
 
   /**

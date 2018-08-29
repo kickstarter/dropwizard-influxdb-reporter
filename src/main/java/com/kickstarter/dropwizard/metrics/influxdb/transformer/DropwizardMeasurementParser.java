@@ -80,12 +80,19 @@ public class DropwizardMeasurementParser {
    * @return an Optional-wrapped {@link DropwizardMeasurement} with any matched tags, and no field value.
    */
   private Optional<DropwizardMeasurement> templatedMeasurement(final String metricName) {
+    DropwizardMeasurement measurement = DropwizardMeasurement.fromLine(metricName);
+    String baseName = measurement.name();
+    Map<String, String> tags = measurement.tags();
     for (final Map.Entry<String, TaggedPattern> entry : metricTemplates.entrySet()) {
-      final Optional<DropwizardMeasurement> measurement = entry.getValue().tags(metricName)
-        .map(tags -> DropwizardMeasurement.create(entry.getKey(), tags, Optional.empty()));
+      final Optional<DropwizardMeasurement> matchedMeasurement = entry.getValue()
+              .tags(baseName)
+              .map(matchedTags -> {
+                tags.putAll(matchedTags);
+                return DropwizardMeasurement.create(entry.getKey(), tags, measurement.field());
+              });
 
-      if (measurement.isPresent()) {
-        return measurement;
+      if (matchedMeasurement.isPresent()) {
+        return matchedMeasurement;
       }
     }
 
