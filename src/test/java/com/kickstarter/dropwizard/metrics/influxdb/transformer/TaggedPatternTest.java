@@ -45,4 +45,15 @@ public class TaggedPatternTest {
       untaggedPattern.tags(".hello.anything.whatever")
     );
   }
+
+  @Test
+  public void testTags_optionalGroup() {
+    final TaggedPattern optionalPattern = new TaggedPattern(
+      "\\.hello\\.(?<action>[A-Za-z]+)\\.(?<number>[0-9]+)?\\.?(?<model>.*)",
+      "action", "number", "model");
+    assertEquals(
+      Optional.of(ImmutableMap.of("action", "move", "model", "foobar")),
+      optionalPattern.tags(".hello.move.foobar")
+    );
+  }
 }
