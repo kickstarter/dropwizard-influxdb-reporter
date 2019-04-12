@@ -59,6 +59,7 @@ public class TaggedPattern {
     final Matcher matcher = compiledPattern.matcher(input);
     if (matcher.matches()) {
       return Optional.of(tagKeys.stream()
+        .filter(tag -> matcher.group(tag) != null)
         .filter(tag -> !matcher.group(tag).isEmpty())
         .collect(toMap(Function.identity(), matcher::group)));
     }
