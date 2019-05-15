@@ -22,11 +22,9 @@ import java.util.concurrent.Executors;
  * An {@link InfluxDbWriter} that writes to an HTTP/S server using a {@link Client}.
  */
 public class InfluxDbHttpWriter implements InfluxDbWriter {
-  private final Client client;
   private final WebTarget influxLines;
 
   public InfluxDbHttpWriter(final Client client, final String endpoint) {
-    this.client = client;
     this.influxLines = client.target(endpoint);
   }
 
@@ -36,9 +34,7 @@ public class InfluxDbHttpWriter implements InfluxDbWriter {
   }
 
   @Override
-  public void close() throws IOException {
-    client.close();
-  }
+  public void close() throws IOException {} // NOOP
 
   // ===================================================================================================================
   // Builder
