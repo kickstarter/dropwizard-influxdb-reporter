@@ -8,6 +8,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 
@@ -32,7 +33,16 @@ public class InfluxDbHttpWriter implements InfluxDbWriter {
 
   @Override
   public void writeBytes(final byte[] bytes) {
-    influxLines.request().post(Entity.entity(bytes, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+    Response response = null;
+    try {
+        response = influxLines.request()
+          .post(Entity.entity(bytes, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+    }
+    finally {
+      if (response != null) {
+        response.close();
+      }
+    }
   }
 
   @Override
